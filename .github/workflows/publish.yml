@@ -49,8 +49,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.email "utinfrancis.dev@gmail.com"
-          git config --global user.name "utin-francis-peter"
+          git config --global user.email "salil.naik27@gmail.com"
+          git config --global user.name "salil-naik"
 
           # triggers push
       - name: Push changes to build branch
