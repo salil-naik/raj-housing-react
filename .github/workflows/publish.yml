@@ -17,13 +17,45 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npm run build # The build command of your project
-
-      - name: Push
-        uses: s0/git-publish-subdir-action@develop
+        run: npm run build
         env:
-          REPO: self
-          BRANCH: build # The branch name where you want to push the assets
-          FOLDER: build # The directory where your assets are generated
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
-          MESSAGE: "Build: ({sha}) {msg}" # The commit message
+          NODEMAILER_PASSWORD: ${{ secrets.NODEMAILER_PASSWORD }}
+          NODEMAILER_EMAIL: ${{ secrets.NODEMAILER_EMAIL }}
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_PROJECT_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_DATASET }}
+          NEXT_PUBLIC_SANITY_PROJECT_API_VERSION: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_API_VERSION }}
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+          RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: production
+
+      - name: Checkout build branch
+        run: |
+          git fetch origin build || git checkout --orphan build
+          git reset --hard
+          git clean -fdx
+          git checkout build || git checkout --orphan build
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: ./build
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "utinfrancis.dev@gmail.com"
+          git config --global user.name "utin-francis-peter"
+
+      - name: Push changes to build branch
+        run: |
+          git add build/
+          git commit -m "build: added build artifacts"
+          git push origin build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
