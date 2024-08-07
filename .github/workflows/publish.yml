@@ -61,7 +61,7 @@ jobs:
 
       - name: Push changes to build branch
         run: |
-          git add build/
+          git add .
           git commit -m "build: added build artifacts"
           git push origin build
         env:
